@@ -3,6 +3,9 @@ import { useState } from "react";
 import FindCourse from "./components/FindCourse";
 import InputMat from "./components/InputMat";
 import FileInput from "./components/FileInput";
+import InputFakul from "./components/InputFakul";
+import FileInputFakul from "./components/FileInputFakul";
+import FindCourse2 from "./components/FindCourse2";
 // import InputMat from "./components/inputMat";
 
 interface MatInput {
@@ -22,6 +25,18 @@ interface SearchInput {
   semester: number;
 }
 
+interface SearchInputBonus {
+  minsks: number;
+  maxsks: number;
+  jurusan: string;
+  semester: number;
+}
+
+interface FakulInput {
+  jurusan: string;
+  fakultas: string;
+}
+
 interface Output {
   outStr: string;
 }
@@ -32,6 +47,10 @@ interface Link {
 
 interface MatList {
   buffer: MatInput[];
+}
+
+interface FakulList {
+  buffer: FakulInput[];
 }
 
 function App() {
@@ -52,7 +71,23 @@ function App() {
     semester: 0,
   });
 
+  const [dataSearchBonus, setDataSearchBonus] = useState<SearchInputBonus>({
+    minsks: 0,
+    maxsks: 0,
+    jurusan: "",
+    semester: 0,
+  });
+
+  const [dataFakul, setfakuldat] = useState<FakulInput>({
+    jurusan: "",
+    fakultas: "",
+  });
+
   const [linkString, setLinkString] = useState<Link>({
+    link: "",
+  });
+
+  const [linkStringFakul, setLinkStringFakul] = useState<Link>({
     link: "",
   });
 
@@ -77,11 +112,42 @@ function App() {
     }
   };
 
+  const getResponse2 = async () => {
+    setLoading(true);
+    try {
+      // console.log(dataSearch);
+      const response = await axios.post(
+        BASE_URL + "getAnswer2",
+        dataSearchBonus
+      );
+      const responseData = response.data.result as string;
+      setOut(responseData);
+      // console.log(responseData);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getResponseAdd = async () => {
     try {
       console.log(dataMat);
       const response = await axios.post(BASE_URL + "addMat", dataMat);
-      const responseData = response.data.message as Output;
+      const responseData = response.data.message as string;
+      console.log(responseData);
+    } catch (err) {
+      console.error(err);
+    } finally {
+    }
+    // console.log(dataMat);
+  };
+
+  const getResponseAddFakul = async () => {
+    try {
+      console.log(dataFakul);
+      const response = await axios.post(BASE_URL + "addFakul", dataFakul);
+      const responseData = response.data.message as string;
       console.log(responseData);
     } catch (err) {
       console.error(err);
@@ -91,6 +157,10 @@ function App() {
   };
 
   const [MatList, SetMatList] = useState<MatList>({
+    buffer: [],
+  });
+
+  const [FakulList, SetFakulList] = useState<FakulList>({
     buffer: [],
   });
 
@@ -127,11 +197,53 @@ function App() {
     }
   };
 
+  const getResponseFileFakul = async () => {
+    if (linkStringFakul.link !== "") {
+      try {
+        const response = await axios.get(linkStringFakul.link);
+        const jsonData = response.data;
+
+        const newFakulList: FakulList = {
+          buffer: [],
+        };
+
+        for (const entity of jsonData) {
+          const newFakul: FakulInput = {
+            jurusan: entity.Jurusan,
+            fakultas: entity.Fakultas,
+          };
+
+          newFakulList.buffer.push(newFakul);
+        }
+        console.log(newFakulList);
+
+        SetFakulList(newFakulList); // Save the new MatList in your state
+
+        console.log("File data processed successfully");
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+
   const getResponseAllFile = async () => {
     try {
       for (const entity of MatList.buffer) {
         const response = await axios.post(BASE_URL + "addMat", entity);
-        const responseData = response.data.message as Output;
+        const responseData = response.data.message as string;
+        console.log(responseData);
+      }
+      console.log("All data added successfully");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const getResponseAllFileFakul = async () => {
+    try {
+      for (const entity of FakulList.buffer) {
+        const response = await axios.post(BASE_URL + "addFakul", entity);
+        const responseData = response.data.message as string;
         console.log(responseData);
       }
       console.log("All data added successfully");
@@ -150,6 +262,16 @@ function App() {
     });
   };
 
+  const handleSearchInputChange2 = (
+    field: keyof SearchInputBonus,
+    value: string | number
+  ) => {
+    setDataSearchBonus({
+      ...dataSearchBonus,
+      [field]: value,
+    });
+  };
+
   const handleMatInputChange = (
     field: keyof MatInput,
     value: string | number
@@ -162,8 +284,27 @@ function App() {
     });
   };
 
+  const handleFakulInputChange = (
+    field: keyof FakulInput,
+    value: string | number
+  ) => {
+    return Promise.resolve().then(() => {
+      setfakuldat((prevData) => ({
+        ...prevData,
+        [field]: value,
+      }));
+    });
+  };
+
   const handleFileSelect = (field: keyof Link, value: string) => {
     setLinkString({
+      ...linkString,
+      [field]: value,
+    });
+  };
+
+  const handleFileSelectFakul = (field: keyof Link, value: string) => {
+    setLinkStringFakul({
       ...linkString,
       [field]: value,
     });
@@ -189,9 +330,20 @@ function App() {
             fileInputLink={linkString}
             onFileSelect={handleFileSelect}
           />
+
           <button onClick={getResponseFile}>Read</button>
           <p>
             <button onClick={getResponseAllFile}>Upload to DB</button>
+          </p>
+
+          <FileInputFakul
+            fileInputLink={linkStringFakul}
+            onFileSelect={handleFileSelectFakul}
+          />
+
+          <button onClick={getResponseFileFakul}>Read</button>
+          <p>
+            <button onClick={getResponseAllFileFakul}>Upload to DB</button>
           </p>
           <InputMat
             searchInput={dataMat}
@@ -199,10 +351,22 @@ function App() {
             onGetResponse={getResponseAdd}
           />
 
+          <InputFakul
+            searchInput={dataFakul}
+            onInputChange={handleFakulInputChange}
+            onGetResponse={getResponseAddFakul}
+          ></InputFakul>
+
           <FindCourse
             searchInput={dataSearch}
             onSearchInputChange={handleSearchInputChange}
             onGetResponse={getResponse}
+          />
+
+          <FindCourse2
+            searchInput={dataSearchBonus}
+            onSearchInputChange2={handleSearchInputChange2}
+            onGetResponse2={getResponse2}
           />
           {loading ? (
             <p>Loading...</p>
