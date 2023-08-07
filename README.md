@@ -26,8 +26,3 @@ Back End: [Click Here](https://github.com/maximatey/course_schedulerBE)
 
 * [Strategi Algoritma 2022/2023 - Rinaldi Munir](https://informatika.stei.itb.ac.id/~rinaldi.munir/Stmik/2020-2021/Program-Dinamis-2020-Bagian1.pdf)
 * [Dynamic Programming - Geeksforgeeks](https://informatika.stei.itb.ac.id/~rinaldi.munir/Stmik/2020-2021/Program-Dinamis-2020-Bagian1.pdf)
-
-# Catatan
-
-Database yang digunakan program memiliki host `freemysqlhosting.net`, dimana servernya kadang menjadi down sehingga database tidak dapat diakses.
-Database juga bersifat temporary, dimana database tidak berlaku selamanya.
