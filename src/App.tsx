@@ -56,7 +56,7 @@ function App() {
     link: "",
   });
 
-  const [outputString, setOut] = useState("");
+  const [outputString, setOut] = useState<string>();
 
   const [loading, setLoading] = useState(false);
 
@@ -67,7 +67,7 @@ function App() {
     try {
       // console.log(dataSearch);
       const response = await axios.post(BASE_URL + "getAnswer", dataSearch);
-      const responseData = response.data.result as Output;
+      const responseData = response.data.result as string;
       setOut(responseData);
       // console.log(responseData);
     } catch (err) {
